@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HelloWin", "HelloWin\HelloWin.vcxproj", "{0C021185-D73E-4DC0-A59C-B9C32881B5CC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "btnlook", "btnlook\btnlook.vcxproj", "{7BEB1BF8-1C7A-482E-8D73-24F376277732}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "poppad", "poppad\poppad.vcxproj", "{A5B0D0BA-0273-4327-9C5C-C8FEAF365C3C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "colors", "colors\colors.vcxproj", "{77D6C6E6-142B-40F9-96BE-59EB2D970DB0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0C021185-D73E-4DC0-A59C-B9C32881B5CC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0C021185-D73E-4DC0-A59C-B9C32881B5CC}.Debug|Win32.Build.0 = Debug|Win32
+		{0C021185-D73E-4DC0-A59C-B9C32881B5CC}.Release|Win32.ActiveCfg = Release|Win32
+		{0C021185-D73E-4DC0-A59C-B9C32881B5CC}.Release|Win32.Build.0 = Release|Win32
+		{7BEB1BF8-1C7A-482E-8D73-24F376277732}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7BEB1BF8-1C7A-482E-8D73-24F376277732}.Debug|Win32.Build.0 = Debug|Win32
+		{7BEB1BF8-1C7A-482E-8D73-24F376277732}.Release|Win32.ActiveCfg = Release|Win32
+		{7BEB1BF8-1C7A-482E-8D73-24F376277732}.Release|Win32.Build.0 = Release|Win32
+		{A5B0D0BA-0273-4327-9C5C-C8FEAF365C3C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A5B0D0BA-0273-4327-9C5C-C8FEAF365C3C}.Debug|Win32.Build.0 = Debug|Win32
+		{A5B0D0BA-0273-4327-9C5C-C8FEAF365C3C}.Release|Win32.ActiveCfg = Release|Win32
+		{A5B0D0BA-0273-4327-9C5C-C8FEAF365C3C}.Release|Win32.Build.0 = Release|Win32
+		{77D6C6E6-142B-40F9-96BE-59EB2D970DB0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{77D6C6E6-142B-40F9-96BE-59EB2D970DB0}.Debug|Win32.Build.0 = Debug|Win32
+		{77D6C6E6-142B-40F9-96BE-59EB2D970DB0}.Release|Win32.ActiveCfg = Release|Win32
+		{77D6C6E6-142B-40F9-96BE-59EB2D970DB0}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
