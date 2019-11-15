@@ -10,9 +10,9 @@
 #define ID_TEXT 2
 
 // 全局变量:
-HINSTANCE hInst;								// 当前实例
-TCHAR szTitle1[MAX_LOADSTRING];					// 标题栏文本
-TCHAR szWindowClass1[MAX_LOADSTRING];			// 主窗口类名
+HINSTANCE hInst = NULL;								// 当前实例
+TCHAR szTitle1[MAX_LOADSTRING] = {_T('\0')};					// 标题栏文本
+TCHAR szWindowClass1[MAX_LOADSTRING] = {_T('\0')};			// 主窗口类名
 
 // 此代码模块中包含的函数的前向声明:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -110,8 +110,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    HWND hWnd;
 
    hInst = hInstance; // 将实例句柄存储在全局变量中
-
-   hWnd = CreateWindow(szWindowClass1, szTitle1, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+   //CreateWindowW(lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam)
+   hWnd = CreateWindow(_T("ENVIRON"), _T("ENVIRON"), WS_OVERLAPPEDWINDOW, 0, 0, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
 
    if (!hWnd)
    {
@@ -150,11 +150,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		cxChar = LOWORD(GetDialogBaseUnits());
 		cyChar = HIWORD(GetDialogBaseUnits());
 
-		hwndList = CreateWindow(TEXT("listbox1"), NULL, WS_CHILD|WS_VISIBLE|LBS_STANDARD, cxChar, 3*cyChar, 16*cxChar + GetSystemMetrics(SM_CXVSCROLL),	cyChar*5,
+		hwndList = CreateWindow(TEXT("listbox"), NULL, WS_CHILD|WS_VISIBLE|LBS_STANDARD, cxChar, 3*cyChar, 16*cxChar + GetSystemMetrics(SM_CXVSCROLL),	cyChar*5,
 			hWnd, (HMENU)ID_LIST,
 			(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
 
-		hwndText = CreateWindow(TEXT("staticxt"), NULL, WS_CHILD|WS_VISIBLE|SS_LEFT,      cxChar, cyChar,   GetSystemMetrics(SM_CXSCREEN),              cyChar, 
+		hwndText = CreateWindow(TEXT("static"), NULL, WS_CHILD|WS_VISIBLE|SS_LEFT,      cxChar, cyChar,   GetSystemMetrics(SM_CXSCREEN),              cyChar, 
 			hWnd, (HMENU)ID_TEXT, 
 			(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
 
@@ -169,27 +169,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		wmId    = LOWORD(wParam);
 		wmEvent = HIWORD(wParam);
 
-		if(LOWORD(wParam) == ID_LIST && HIWORD(wParam) == LBN_SELCHANGE)
-		{
-			//get current selection
-			iIndex = SendMessage(hwndList, LB_GETCURSEL, 0, 0);
-			iLength = SendMessage(hwndList, LB_GETTEXTLEN, iIndex, 0) + 1;
-			pVarName = (TCHAR*)calloc(iLength, sizeof(TCHAR));
-			SendMessage(hwndList, LB_GETTEXT, iIndex, (LPARAM)pVarName);
-
-			//get environment string
-			iLength = GetEnvironmentVariable(pVarName, NULL, 0);
-			pVarValue = (TCHAR*)calloc(iLength, sizeof(TCHAR));
-			GetEnvironmentVariable(pVarName, pVarValue, iLength);
-
-			//show it in window
-			SetWindowText(hwndText, pVarValue);
-			free(pVarName);
-			free(pVarValue);
-		}
 		// 分析菜单选择:
 		switch (wmId)
 		{
+		case LBN_SELCHANGE:
+			if(wmId == ID_LIST)
+			{
+				//get current selection
+				iIndex = SendMessage(hwndList, LB_GETCURSEL, 0, 0);
+				iLength = SendMessage(hwndList, LB_GETTEXTLEN, iIndex, 0) + 1;
+				pVarName = (TCHAR*)calloc(iLength, sizeof(TCHAR));
+				SendMessage(hwndList, LB_GETTEXT, iIndex, (LPARAM)pVarName);
+
+				//get environment string
+				iLength = GetEnvironmentVariable(pVarName, NULL, 0);
+				pVarValue = (TCHAR*)calloc(iLength, sizeof(TCHAR));
+				GetEnvironmentVariable(pVarName, pVarValue, iLength);
+
+				//show it in window
+				SetWindowText(hwndText, pVarValue);
+				free(pVarName);
+				free(pVarValue);			
+			}
+			return 0;
+
 		case IDM_ABOUT:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
@@ -237,15 +240,16 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 void FillListBox(HWND hwndList)
 {
 	int iLength;
-	TCHAR *pVarBlock, *pVarBeg, *pVarEnd, *pVarName;
+	TCHAR *pVarBlock, *pVarBeg, *pVarEnd, *pVarName, *pAddr;
 
 	pVarBlock = GetEnvironmentStrings();
+	pAddr = pVarBlock;
 	while(*pVarBlock)
 	{
-		if(*pVarBlock != '=')//skip variable names begin with '='
+		if(*pVarBlock != _T('='))//skip variable names begin with '='
 		{
 			pVarBeg = pVarBlock;//begining of variable name
-			while(*pVarBlock++ != '=');//scan util '='			
+			while(*pVarBlock++ != _T('='));//scan util '='			
 			//points to '=' sign
 			pVarEnd = pVarBlock - 1;
 			//;ength og variable name
@@ -253,14 +257,14 @@ void FillListBox(HWND hwndList)
 			//allocate memory for varialbe name termining zero. copy the variable name and append zero
 			pVarName = (TCHAR*)calloc(iLength + 1, sizeof(TCHAR));
 			CopyMemory(pVarName, pVarBeg, iLength * sizeof(TCHAR));
-			pVarName[iLength] = '\0';
+			pVarName[iLength] = _T('\0');
 			SendMessage(hwndList, LB_ADDSTRING, 0, (LPARAM)pVarName);
 			free(pVarName);
 			
 		}
-		while(*pVarBlock++ != '\0');
+		while(*pVarBlock++ != _T('\0'));
 
 	}
-	FreeEnvironmentStrings(pVarBlock);
+	FreeEnvironmentStrings(pAddr);
 
 }
