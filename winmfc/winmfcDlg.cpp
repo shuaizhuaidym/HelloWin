@@ -78,17 +78,25 @@ BOOL CwinmfcDlg::OnInitDialog()
 	// IDM_ABOUTBOX 必须在系统命令范围内。
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
-	mEditBrowse.EnableFileBrowseButton();
+
+	//设置文件格式过滤
+	mEditBrowse.EnableFileBrowseButton(_T(""),_T("Bash Files(*.sh)|*.sh|Text Files(*.txt)|*.txt|All Files (*.*)|*.*||"));
 	
 	//设置按钮图标
 	//HICON hIcon = NULL;
 	//hIcon = theApp.LoadIcon(IDI_ICON3);
-	//MessageBox(_T("AAA"), _T("test"),MB_OK);
 	CBitmap bitmap;
 	bitmap.LoadBitmap(IDB_BITMAP1);
 
+	//mEditBrowse.SetBrowseButtonImage(bitmap, true);
 
-	mEditBrowse.SetBrowseButtonImage(bitmap, true);
+	//获取全路径：
+
+	//（1）为控件添加Value类别的Cstring类型的变量，UpdateData(TRUE);即可
+
+	//（2）或定义变量CString mFilePath;
+
+	// GetDlgItemText(IDC_MFCEDITBROWSE1, mFilePath);
 
 
 
@@ -193,9 +201,71 @@ void CwinmfcDlg::OnEnUpdateMfceditbrowse1()
 
 void CwinmfcDlg::OnBnClickedMfcbutton1()
 {
+	// TODO: 在此添加控件通知处理程序代码
 	CString selectedPath;
 	GetDlgItemText(IDC_MFCEDITBROWSE1, selectedPath);
+
+	CFile file;
+	CFileException ex;
+	//CString fileText;
+	char* content;
+	// open the source file for reading
+	if (!file.Open(selectedPath, CFile::modeRead | CFile::shareDenyWrite, &ex))
+	{
+		// complain if an error happened ,no need to delete the ex object
+		TCHAR szError[1024];
+		ex.GetErrorMessage(szError, 1024);
+		TRACE1("Couldn't open source file: %s\n", szError);
+	}
+	else
+	{
+		UINT nBytes = (UINT)file.GetLength();
+		int nChars = nBytes / sizeof(TCHAR);
+		
+		content = (char*)malloc(nBytes * sizeof(char));
+
+		nBytes = file.Read(content, nBytes);
+
+		//file.SeekToBegin();
+		//nBytes = file.Read(fileText.GetBuffer(nChars), nBytes);
+
+		//wchar_t wtext[4096];
+		//mbstowcs(wtext, content, strlen(content)+1);//Plus null
+		//LPWSTR ptr = wtext;
+		 
+		const WCHAR *pwcsName;
+		// required size
+		int nChars2 = MultiByteToWideChar(CP_ACP, 0, content, -1, NULL, 0);
+		// allocate it
+		pwcsName = new WCHAR[nChars2];
+		MultiByteToWideChar(CP_ACP, 0, content, -1, (LPWSTR)pwcsName, nChars2);
+		// use it....
+
+		CWnd *pwndStatic = this->GetDlgItem(IDC_EDIT1);
+		if (pwndStatic)
+		{
+			pwndStatic->SetWindowTextW((LPWSTR)pwcsName);
+		}
+		//fileText.ReleaseBuffer(nChars);
+		free(content);
+		// delete it
+		delete [] pwcsName;
+
+	}
 								
-	MessageBox(selectedPath, _T("test"),MB_OK);
-	// TODO: 在此添加控件通知处理程序代码
+	//MessageBox(selectedPath, _T("test"),MB_OK);
+}
+void readFile(TCHAR* filePath)
+{						   
+	CFile	myFile;
+	TCHAR	szBuffer[100]; 
+	UINT    nActual = 0;
+	CString fileText;
+	if ( myFile.Open( _T("c:\\test\\myfile.dat"), CFile::modeCreate | CFile::modeReadWrite ) )
+	{
+		myFile.Write( szBuffer, sizeof( szBuffer ) ); 
+		myFile.Flush();
+		myFile.Seek( 0, CFile::begin );
+		nActual = myFile.Read( szBuffer, sizeof( szBuffer ) ); 
+	}
 }
