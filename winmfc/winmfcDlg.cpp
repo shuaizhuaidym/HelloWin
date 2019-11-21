@@ -60,9 +60,9 @@ BEGIN_MESSAGE_MAP(CwinmfcDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_EN_CHANGE(IDC_MFCEDITBROWSE1, &CwinmfcDlg::OnEnChangeMfceditbrowse1)
-	ON_EN_UPDATE(IDC_MFCEDITBROWSE1, &CwinmfcDlg::OnEnUpdateMfceditbrowse1)
-	ON_BN_CLICKED(IDC_MFCBUTTON1, &CwinmfcDlg::OnBnClickedMfcbutton1)
+	ON_EN_CHANGE(IDC_MFCEDITBROWSE_SRC, &CwinmfcDlg::OnEnChangeMfceditbrowse1)
+	ON_EN_UPDATE(IDC_MFCEDITBROWSE_DST, &CwinmfcDlg::OnEnUpdateMfceditbrowse1)
+	ON_BN_CLICKED(IDC_MFCBTN_ENC, &CwinmfcDlg::OnBnClickedMfcbtnEnc)
 END_MESSAGE_MAP()
 
 
@@ -199,7 +199,7 @@ void CwinmfcDlg::OnEnUpdateMfceditbrowse1()
 }
 
 
-void CwinmfcDlg::OnBnClickedMfcbutton1()
+void CwinmfcDlg::OnBnClickedMfcbtnEnc()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CString selectedPath;
@@ -269,3 +269,16 @@ void readFile(TCHAR* filePath)
 		nActual = myFile.Read( szBuffer, sizeof( szBuffer ) ); 
 	}
 }
+
+void CwinmfcDlg::OnBnClickedCancel()
+{
+	// TODO: Add your control notification handler code here
+	CDialogEx::OnCancel();
+}
+
+
+void CwinmfcDlg::OnBnClickedCheck1()
+{
+	// TODO: Add your control notification handler code here
+}
+

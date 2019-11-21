@@ -34,4 +34,7 @@ public:
 	afx_msg void OnEnChangeMfceditbrowse1();
 	afx_msg void OnEnUpdateMfceditbrowse1();
 	afx_msg void OnBnClickedMfcbutton1();
+	afx_msg void OnBnClickedCancel();
+	afx_msg void OnBnClickedCheck1();
+	afx_msg void OnBnClickedMfcbtnEnc();
 };
