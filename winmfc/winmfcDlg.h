@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "afxwin.h"
 
 
 // CwinmfcDlg ¶Ô»°¿ò
@@ -37,4 +38,5 @@ public:
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnBnClickedCheck1();
 	afx_msg void OnBnClickedMfcbtnEnc();
+	CEdit mEditPwd;
 };

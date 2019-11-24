@@ -54,6 +54,7 @@ void CwinmfcDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	//绑定控件
 	DDX_Control(pDX, IDC_MFCEDITBROWSE1, mEditBrowse);  // IDC_STATIC为控件的ID号
+	DDX_Control(pDX, IDC_EDITPWD, mEditPwd);
 }
 
 BEGIN_MESSAGE_MAP(CwinmfcDlg, CDialogEx)
@@ -233,23 +234,31 @@ void CwinmfcDlg::OnBnClickedMfcbtnEnc()
 		//mbstowcs(wtext, content, strlen(content)+1);//Plus null
 		//LPWSTR ptr = wtext;
 		 
-		const WCHAR *pwcsName;
-		// required size
+		const WCHAR *pwcsContent;
+		//required size
 		int nChars2 = MultiByteToWideChar(CP_ACP, 0, content, -1, NULL, 0);
-		// allocate it
-		pwcsName = new WCHAR[nChars2];
-		MultiByteToWideChar(CP_ACP, 0, content, -1, (LPWSTR)pwcsName, nChars2);
-		// use it....
+		//allocate it
+		pwcsContent = new WCHAR[nChars2];
+		MultiByteToWideChar(CP_ACP, 0, content, -1, (LPWSTR)pwcsContent, nChars2);		
 
-		CWnd *pwndStatic = this->GetDlgItem(IDC_EDIT1);
+		//display file content on static control
+		CWnd *pwndStatic = this->GetDlgItem(IDC_EDIT_INFO);
 		if (pwndStatic)
 		{
-			pwndStatic->SetWindowTextW((LPWSTR)pwcsName);
+			pwndStatic->SetWindowTextW((LPWSTR)pwcsContent);
 		}
 		//fileText.ReleaseBuffer(nChars);
 		free(content);
 		// delete it
-		delete [] pwcsName;
+		delete [] pwcsContent;
+
+		mEditPwd.GetCapture();
+		LPTSTR* pwd;
+		CString ppwd;
+		//mEditPwd.GetWindowText(pwd,100);
+		mEditPwd.GetWindowText(ppwd);
+		MessageBox(ppwd, _T("PWD"), MB_OK);
+
 
 	}
 								
