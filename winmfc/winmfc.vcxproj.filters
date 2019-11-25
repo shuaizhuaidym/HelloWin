@@ -45,6 +45,12 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="TT.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DESEnc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="winmfc.cpp">
@@ -54,6 +60,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TT.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DESEnc.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

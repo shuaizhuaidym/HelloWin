@@ -6,7 +6,7 @@
 #include "winmfc.h"
 #include "winmfcDlg.h"
 #include "afxdialogex.h"
-
+#include "DESEnc.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -40,11 +40,13 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 END_MESSAGE_MAP()
+//end CAboutDlg
 
 // CwinmfcDlg 对话框
 
 CwinmfcDlg::CwinmfcDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CwinmfcDlg::IDD, pParent)
+	, mSzEncAlg(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -53,17 +55,23 @@ void CwinmfcDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	//绑定控件
-	DDX_Control(pDX, IDC_MFCEDITBROWSE1, mEditBrowse);  // IDC_STATIC为控件的ID号
-	DDX_Control(pDX, IDC_EDITPWD, mEditPwd);
+	DDX_Control(pDX, IDC_MFCEDITBROWSE1, mEditBrowse);  // IDC_MFCEDITBROWSE1为控件的ID号
+	DDX_Control(pDX, IDC_RBTN_DEFAULT, mBtnAlgDefault);
+	DDX_Control(pDX, IDC_EDITPWD, mCEditPwd);
 }
 
 BEGIN_MESSAGE_MAP(CwinmfcDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_EN_CHANGE(IDC_MFCEDITBROWSE_SRC, &CwinmfcDlg::OnEnChangeMfceditbrowse1)
-	ON_EN_UPDATE(IDC_MFCEDITBROWSE_DST, &CwinmfcDlg::OnEnUpdateMfceditbrowse1)
+	ON_EN_CHANGE(IDC_MFCEDITBROWSE_SRC, &CwinmfcDlg::OnEnChangeMfceditbrowseSrc)
+	ON_EN_UPDATE(IDC_MFCEDITBROWSE_DST, &CwinmfcDlg::OnEnUpdateMfceditbrowseDst)
 	ON_BN_CLICKED(IDC_MFCBTN_ENC, &CwinmfcDlg::OnBnClickedMfcbtnEnc)
+	ON_BN_CLICKED(IDC_RD_DEFAULT, &CwinmfcDlg::OnBnClickedRdAlg)
+	ON_EN_CHANGE(IDC_MFCEDITBROWSE_DST, &CwinmfcDlg::OnEnChangeMfceditbrowseDst)
+	ON_BN_CLICKED(IDC_RBTN_DES, &CwinmfcDlg::OnBnClickedRbtnDes)
+	ON_BN_CLICKED(IDC_RBTN_AES, &CwinmfcDlg::OnBnClickedRbtnAes)
+	ON_BN_CLICKED(IDC_RBTN_SM4, &CwinmfcDlg::OnBnClickedRbtnSm4)
 END_MESSAGE_MAP()
 
 
@@ -86,20 +94,18 @@ BOOL CwinmfcDlg::OnInitDialog()
 	//设置按钮图标
 	//HICON hIcon = NULL;
 	//hIcon = theApp.LoadIcon(IDI_ICON3);
-	CBitmap bitmap;
-	bitmap.LoadBitmap(IDB_BITMAP1);
+	//CBitmap bitmap;
+	//bitmap.LoadBitmap(IDB_BITMAP1);
 
 	//mEditBrowse.SetBrowseButtonImage(bitmap, true);
 
 	//获取全路径：
-
-	//（1）为控件添加Value类别的Cstring类型的变量，UpdateData(TRUE);即可
-
+	//（1）为控件添加Value类别的Cstring类型的变量，UpdateData(TRUE);即可 
 	//（2）或定义变量CString mFilePath;
-
 	// GetDlgItemText(IDC_MFCEDITBROWSE1, mFilePath);
 
-
+	mBtnAlgDefault.SetCheck(1);//选中默认加密算法
+	mSzEncAlg = _T("DES");
 
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
 	if (pSysMenu != NULL)
@@ -176,7 +182,7 @@ HCURSOR CwinmfcDlg::OnQueryDragIcon()
 
 
 
-void CwinmfcDlg::OnEnChangeMfceditbrowse1()
+void CwinmfcDlg::OnEnChangeMfceditbrowseSrc()
 {
 	// TODO:  如果该控件是 RICHEDIT 控件，它将不
 	// 发送此通知，除非重写 CDialogEx::OnInitDialog()
@@ -188,7 +194,7 @@ void CwinmfcDlg::OnEnChangeMfceditbrowse1()
 
 
 
-void CwinmfcDlg::OnEnUpdateMfceditbrowse1()
+void CwinmfcDlg::OnEnUpdateMfceditbrowseDst()
 {
 
 	// TODO:  如果该控件是 RICHEDIT 控件，它将不
@@ -234,37 +240,58 @@ void CwinmfcDlg::OnBnClickedMfcbtnEnc()
 		//mbstowcs(wtext, content, strlen(content)+1);//Plus null
 		//LPWSTR ptr = wtext;
 		 
-		const WCHAR *pwcsContent;
-		//required size
+		const WCHAR *pwcsName;
+		// required size
 		int nChars2 = MultiByteToWideChar(CP_ACP, 0, content, -1, NULL, 0);
-		//allocate it
-		pwcsContent = new WCHAR[nChars2];
-		MultiByteToWideChar(CP_ACP, 0, content, -1, (LPWSTR)pwcsContent, nChars2);		
+		// allocate it
+		pwcsName = new WCHAR[nChars2];
+		MultiByteToWideChar(CP_ACP, 0, content, -1, (LPWSTR)pwcsName, nChars2);
+		// use it....
 
-		//display file content on static control
-		CWnd *pwndStatic = this->GetDlgItem(IDC_EDIT_INFO);
+		CWnd *pwndStatic = this->GetDlgItem(IDC_EDIT1);
 		if (pwndStatic)
 		{
-			pwndStatic->SetWindowTextW((LPWSTR)pwcsContent);
+			pwndStatic->SetWindowTextW((LPWSTR)pwcsName);
 		}
 		//fileText.ReleaseBuffer(nChars);
 		free(content);
 		// delete it
-		delete [] pwcsContent;
+		delete [] pwcsName;
 
-		mEditPwd.GetCapture();
-		LPTSTR* pwd;
-		CString ppwd;
-		//mEditPwd.GetWindowText(pwd,100);
-		mEditPwd.GetWindowText(ppwd);
-		MessageBox(ppwd, _T("PWD"), MB_OK);
+		CString strPwd;
+		mCEditPwd.GetWindowText(strPwd);
 
-
+		MessageBox(strPwd, _T("title"), MB_OK);
 	}
-								
-	//MessageBox(selectedPath, _T("test"),MB_OK);
+						
+	DESEnc* enc = new DESEnc();
+	std::string secret = enc->Encrypt("abc","111111");
+	MessageBox((LPCTSTR)secret.c_str(), L"SECRET", MB_OK);
 }
-void readFile(TCHAR* filePath)
+/*write file*/
+void writeFile(TCHAR* filePath, std::string content)
+{
+	/*TCHAR* pszFileName = _T("c:\\test\\myfile.dat");
+	CFile myFile;
+	CFileException fileException;
+
+	if ( !myFile.Open( pszFileName, CFile::modeCreate |   
+		CFile::modeReadWrite, &fileException ) )
+	{
+		TRACE( _T("Can't open file %s, error = %u\n"),
+			pszFileName, fileException.m_cause );
+	}*/	
+	CFile	myFile;
+	TCHAR	szBuffer[100]; 
+	UINT    nActual = 0;
+	CString fileText;
+	if ( myFile.Open(filePath, CFile::modeCreate | CFile::modeReadWrite ))
+	{
+		myFile.Write( szBuffer, sizeof( szBuffer ) ); 
+		myFile.Flush(); 
+	}
+}
+void readFile(TCHAR* filePath, char* buffer)
 {						   
 	CFile	myFile;
 	TCHAR	szBuffer[100]; 
@@ -284,10 +311,89 @@ void CwinmfcDlg::OnBnClickedCancel()
 	// TODO: Add your control notification handler code here
 	CDialogEx::OnCancel();
 }
-
-
-void CwinmfcDlg::OnBnClickedCheck1()
+   
+void CwinmfcDlg::OnBnClickedRdAlg()
 {
-	// TODO: Add your control notification handler code here
+	MessageBox(_T("default alg"), _T("ALG"), MB_OK);
+	CWnd* cwndDft = GetDlgItem(IDC_RBTN_DEFAULT) ;
+	mSzEncAlg = _T("DES");
+
+	// TODO: 在此添加控件通知处理程序代码
 }
 
+
+void CwinmfcDlg::OnEnChangeMfceditbrowseDst()
+{
+	// TODO:  如果该控件是 RICHEDIT 控件，它将不
+	// 发送此通知，除非重写 CDialogEx::OnInitDialog()
+	// 函数并调用 CRichEditCtrl().SetEventMask()，
+	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
+
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CwinmfcDlg::OnBnClickedRbtnDes()
+{
+	mSzEncAlg = _T("DES");
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CwinmfcDlg::OnBnClickedRbtnAes()
+{
+	mSzEncAlg = _T("AES");
+	// TODO: 在此添加控件通知处理程序代码
+}
+
+
+void CwinmfcDlg::OnBnClickedRbtnSm4()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	mSzEncAlg = _T("SM4");
+}
+/**
+void ConvertGBKToUtf8(CString& strGBK) {
+    int len=MultiByteToWideChar(CP_ACP, 0, (LPCTSTR)strGBK, -1, NULL,0);
+    unsigned short * wszUtf8 = new unsigned short[len+1];
+    memset(wszUtf8, 0, len * 2 + 2);
+    MultiByteToWideChar(CP_ACP, 0, (LPCTSTR)strGBK, -1, wszUtf8, len);
+
+    len = WideCharToMultiByte(CP_UTF8, 0, wszUtf8, -1, NULL, 0, NULL, NULL); 
+    char *szUtf8=new char[len + 1];
+    memset(szUtf8, 0, len + 1);
+    WideCharToMultiByte (CP_UTF8, 0, wszUtf8, -1, szUtf8, len, NULL,NULL);
+
+    strGBK = szUtf8;
+    delete[] szUtf8;
+    delete[] wszUtf8;
+}
+
+void ConvertUtf8ToGBK(CString& strUtf8) {
+    int len=MultiByteToWideChar(CP_UTF8, 0, (LPCTSTR)strUtf8, -1, NULL,0);
+    unsigned short * wszGBK = new unsigned short[len+1];
+    memset(wszGBK, 0, len * 2 + 2);
+    MultiByteToWideChar(CP_UTF8, 0, (LPCTSTR)strUtf8, -1, wszGBK, len);
+
+    len = WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, NULL, 0, NULL, NULL); 
+    char *szGBK=new char[len + 1];
+    memset(szGBK, 0, len + 1);
+    WideCharToMultiByte (CP_ACP, 0, wszGBK, -1, szGBK, len, NULL,NULL);
+
+    strUtf8 = szGBK;
+    delete[] szGBK;
+    delete[] wszGBK;
+}
+void ConvertUTF8ToANSI(char *strUtf8, char *strAnsi)
+{
+    int len=MultiByteToWideChar(CP_UTF8, 0, (LPCTSTR)strUtf8, -1, NULL,0); 
+    unsigned short * wszAnsi = new unsigned short[len+1]; 
+    memset(wszAnsi, 0, len * 2 + 2); 
+    MultiByteToWideChar(CP_UTF8, 0, (LPCTSTR)strUtf8, -1, wszAnsi, len); 
+    len = WideCharToMultiByte(CP_ACP, 0, wszAnsi, -1, NULL, 0, NULL, NULL); 
+    WideCharToMultiByte (CP_ACP, 0, wszAnsi, -1, strAnsi, len, NULL,NULL); 
+ 
+    delete[] wszAnsi; 
+}
+
+*/
