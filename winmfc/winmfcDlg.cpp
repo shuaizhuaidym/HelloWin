@@ -1,6 +1,5 @@
 
 // winmfcDlg.cpp : 实现文件
-//
 
 #include "stdafx.h"
 #include "winmfc.h"
@@ -54,8 +53,9 @@ CwinmfcDlg::CwinmfcDlg(CWnd* pParent /*=NULL*/)
 void CwinmfcDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	//绑定控件
-	DDX_Control(pDX, IDC_MFCEDITBROWSE1, mEditBrowse);  // IDC_MFCEDITBROWSE1为控件的ID号
+	//绑定关联控件
+	DDX_Control(pDX, IDC_MFCEDITBROWSE_SRC, mEditBrowseSrc);
+	DDX_Control(pDX, IDC_MFCEDITBROWSE_DST, mEditBrowseDst);
 	DDX_Control(pDX, IDC_RBTN_DEFAULT, mBtnAlgDefault);
 	DDX_Control(pDX, IDC_EDITPWD, mCEditPwd);
 }
@@ -64,14 +64,11 @@ BEGIN_MESSAGE_MAP(CwinmfcDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_EN_CHANGE(IDC_MFCEDITBROWSE_SRC, &CwinmfcDlg::OnEnChangeMfceditbrowseSrc)
-	ON_EN_UPDATE(IDC_MFCEDITBROWSE_DST, &CwinmfcDlg::OnEnUpdateMfceditbrowseDst)
-	ON_BN_CLICKED(IDC_MFCBTN_ENC, &CwinmfcDlg::OnBnClickedMfcbtnEnc)
 	ON_BN_CLICKED(IDC_RD_DEFAULT, &CwinmfcDlg::OnBnClickedRdAlg)
-	ON_EN_CHANGE(IDC_MFCEDITBROWSE_DST, &CwinmfcDlg::OnEnChangeMfceditbrowseDst)
 	ON_BN_CLICKED(IDC_RBTN_DES, &CwinmfcDlg::OnBnClickedRbtnDes)
 	ON_BN_CLICKED(IDC_RBTN_AES, &CwinmfcDlg::OnBnClickedRbtnAes)
 	ON_BN_CLICKED(IDC_RBTN_SM4, &CwinmfcDlg::OnBnClickedRbtnSm4)
+	ON_BN_CLICKED(IDC_MFCBTN_ENC ,&CwinmfcDlg::OnBnClickedMfcbtnEnc)
 END_MESSAGE_MAP()
 
 
@@ -80,32 +77,9 @@ END_MESSAGE_MAP()
 BOOL CwinmfcDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-
-	//mEditBrowse.EnableFileBrowseButton();
-	// 将“关于...”菜单项添加到系统菜单中。
-
-	// IDM_ABOUTBOX 必须在系统命令范围内。
+	// 将“关于...”菜单项添加到系统菜单中；IDM_ABOUTBOX 必须在系统命令范围内。
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
-
-	//设置文件格式过滤
-	mEditBrowse.EnableFileBrowseButton(_T(""),_T("Bash Files(*.sh)|*.sh|Text Files(*.txt)|*.txt|All Files (*.*)|*.*||"));
-	
-	//设置按钮图标
-	//HICON hIcon = NULL;
-	//hIcon = theApp.LoadIcon(IDI_ICON3);
-	//CBitmap bitmap;
-	//bitmap.LoadBitmap(IDB_BITMAP1);
-
-	//mEditBrowse.SetBrowseButtonImage(bitmap, true);
-
-	//获取全路径：
-	//（1）为控件添加Value类别的Cstring类型的变量，UpdateData(TRUE);即可 
-	//（2）或定义变量CString mFilePath;
-	// GetDlgItemText(IDC_MFCEDITBROWSE1, mFilePath);
-
-	mBtnAlgDefault.SetCheck(1);//选中默认加密算法
-	mSzEncAlg = _T("DES");
 
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
 	if (pSysMenu != NULL)
@@ -121,12 +95,27 @@ BOOL CwinmfcDlg::OnInitDialog()
 		}
 	}
 
-	// 设置此对话框的图标。当应用程序主窗口不是对话框时，框架将自动
-	//  执行此操作
-	SetIcon(m_hIcon, TRUE);			// 设置大图标
+	// 设置此对话框的图标。当应用程序主窗口不是对话框时，框架将自动执行此操作
+	SetIcon(m_hIcon, TRUE);		// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	
+	//设置文件格式过滤
+	mEditBrowseSrc.EnableFileBrowseButton(_T(""),_T("Bash Files(*.sh)|*.sh|Text Files(*.txt)|*.txt|All Files (*.*)|*.*||"));
+	mEditBrowseDst.EnableFileBrowseButton(_T(""),_T("Bash Files(*.sh)|*.sh|Text Files(*.txt)|*.txt|All Files (*.*)|*.*||"));
+	SetDlgItemText(IDC_EDITPWD, L"dsserver");
+	
+	//设置按钮图标
+	//HICON hIcon = NULL;
+	//hIcon = theApp.LoadIcon(IDI_ICON3);
+	//CBitmap bitmap;
+	//bitmap.LoadBitmap(IDB_BITMAP1);
+
+	//mEditBrowse.SetBrowseButtonImage(bitmap, true);
+
+	mBtnAlgDefault.SetCheck(1);//设置选中默认加密算法
+	mSzEncAlg = _T("DES");
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -173,36 +162,10 @@ void CwinmfcDlg::OnPaint()
 	}
 }
 
-//当用户拖动最小化窗口时系统调用此函数取得光标
-//显示。
+//当用户拖动最小化窗口时系统调用此函数取得光标显示。
 HCURSOR CwinmfcDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
-}
-
-
-
-void CwinmfcDlg::OnEnChangeMfceditbrowseSrc()
-{
-	// TODO:  如果该控件是 RICHEDIT 控件，它将不
-	// 发送此通知，除非重写 CDialogEx::OnInitDialog()
-	// 函数并调用 CRichEditCtrl().SetEventMask()，
-	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
-
-	// TODO:  在此添加控件通知处理程序代码
-}
-
-
-
-void CwinmfcDlg::OnEnUpdateMfceditbrowseDst()
-{
-
-	// TODO:  如果该控件是 RICHEDIT 控件，它将不
-	// 发送此通知，除非重写 CDialogEx::OnInitDialog()
-	// 函数，以将 EM_SETEVENTMASK 消息发送到该控件，
-	// 同时将 ENM_UPDATE 标志“或”运算到 lParam 掩码中。
-
-	// TODO:  在此添加控件通知处理程序代码
 }
 
 
@@ -212,26 +175,28 @@ void CwinmfcDlg::OnBnClickedMfcbtnEnc()
 	CString selectedPath;
 	GetDlgItemText(IDC_MFCEDITBROWSE1, selectedPath);
 
-	CFile file;
+	CFile fileSrc;
 	CFileException ex;
 	//CString fileText;
 	char* content;
 	// open the source file for reading
-	if (!file.Open(selectedPath, CFile::modeRead | CFile::shareDenyWrite, &ex))
+	if (!fileSrc.Open(selectedPath, CFile::modeRead | CFile::shareDenyWrite, &ex))
 	{
 		// complain if an error happened ,no need to delete the ex object
 		TCHAR szError[1024];
+		CString strErrMsg;
 		ex.GetErrorMessage(szError, 1024);
-		TRACE1("Couldn't open source file: %s\n", szError);
+		
+		strErrMsg.Format(_T("Couldn't open source file: %s\n"), szError);
+		Message(strErrMsg.GetBuffer());
 	}
 	else
 	{
-		UINT nBytes = (UINT)file.GetLength();
+		UINT nBytes = (UINT)fileSrc.GetLength();
 		int nChars = nBytes / sizeof(TCHAR);
-		
-		content = (char*)malloc(nBytes * sizeof(char));
 
-		nBytes = file.Read(content, nBytes);
+		content = (char*)malloc(nBytes * sizeof(char));
+		nBytes = fileSrc.Read(content, nBytes);
 
 		//file.SeekToBegin();
 		//nBytes = file.Read(fileText.GetBuffer(nChars), nBytes);
@@ -239,58 +204,83 @@ void CwinmfcDlg::OnBnClickedMfcbtnEnc()
 		//wchar_t wtext[4096];
 		//mbstowcs(wtext, content, strlen(content)+1);//Plus null
 		//LPWSTR ptr = wtext;
-		 
-		const WCHAR *pwcsName;
+
+		//ANSI格式可以正确显示，UTF-8乱码
+		const WCHAR *wcharContent;
 		// required size
 		int nChars2 = MultiByteToWideChar(CP_ACP, 0, content, -1, NULL, 0);
 		// allocate it
-		pwcsName = new WCHAR[nChars2];
-		MultiByteToWideChar(CP_ACP, 0, content, -1, (LPWSTR)pwcsName, nChars2);
-		// use it....
+		wcharContent = new WCHAR[nChars2];
+		MultiByteToWideChar(CP_ACP, 0, content, -1, (LPWSTR)wcharContent, nChars2);
 
+		//显示文件原文到文本框
 		CWnd *pwndStatic = this->GetDlgItem(IDC_EDIT1);
 		if (pwndStatic)
 		{
-			pwndStatic->SetWindowTextW((LPWSTR)pwcsName);
+			pwndStatic->SetWindowTextW((LPWSTR)wcharContent);
 		}
 		//fileText.ReleaseBuffer(nChars);
 		free(content);
 		// delete it
-		delete [] pwcsName;
+		delete [] wcharContent;
 
+		//获取加密密码
 		CString strPwd;
 		mCEditPwd.GetWindowText(strPwd);
 
-		MessageBox(strPwd, _T("title"), MB_OK);
+		CString cs (strPwd);
+
+		//加密文件					
+		DESEnc* enc = new DESEnc();
+
+		// Convert a TCHAR string to a LPCSTR
+		CT2CA pszConvertedAnsiString (cs);
+		// construct a std::string using the LPCSTR input
+		std::string strStd (pszConvertedAnsiString);
+
+		std::string secret = enc->Encrypt(content, strStd);//std::string s((LPCTSTR)cs);
+
+		//将加密内容写入目标文件
+		CString strDstPath;
+		GetDlgItemText(IDC_MFCEDITBROWSE_DST, strDstPath);
+
+		CFile fileDst;
+		CFileException ex2;
+
+		if (fileDst.Open(strDstPath,  CFile::modeCreate | CFile::modeWrite|CFile::typeBinary, &ex2))
+		{
+			fileDst.Write(secret.c_str(), secret.length());
+		}
+		else
+		{//打开文件失败
+			// complain if an error happened ,no need to delete the ex object
+			TCHAR szError[1024];
+			CString strErrMsg;
+			ex.GetErrorMessage(szError, 1024);
+
+			strErrMsg.Format(_T("Couldn't open source file: %s\n"), szError);
+			Message(strErrMsg.GetBuffer());			
+		}
+
 	}
-						
-	DESEnc* enc = new DESEnc();
-	std::string secret = enc->Encrypt("abc","111111");
-	MessageBox((LPCTSTR)secret.c_str(), L"SECRET", MB_OK);
 }
 /*write file*/
-void writeFile(TCHAR* filePath, std::string content)
+void writeFile(TCHAR* pszFileName, std::string content)
 {
-	/*TCHAR* pszFileName = _T("c:\\test\\myfile.dat");
-	CFile myFile;
-	CFileException fileException;
-
-	if ( !myFile.Open( pszFileName, CFile::modeCreate |   
-		CFile::modeReadWrite, &fileException ) )
-	{
-		TRACE( _T("Can't open file %s, error = %u\n"),
-			pszFileName, fileException.m_cause );
-	}*/	
 	CFile	myFile;
+	CFileException fileException;
 	TCHAR	szBuffer[100]; 
 	UINT    nActual = 0;
 	CString fileText;
-	if ( myFile.Open(filePath, CFile::modeCreate | CFile::modeReadWrite ))
+	if ( myFile.Open(pszFileName, CFile::modeCreate | CFile::modeReadWrite ))
 	{
 		myFile.Write( szBuffer, sizeof( szBuffer ) ); 
 		myFile.Flush(); 
+		TRACE( _T("Can't open file %s, error = %u\n"),
+			pszFileName, fileException.m_cause );
 	}
 }
+/*read file*/
 void readFile(TCHAR* filePath, char* buffer)
 {						   
 	CFile	myFile;
@@ -314,24 +304,8 @@ void CwinmfcDlg::OnBnClickedCancel()
    
 void CwinmfcDlg::OnBnClickedRdAlg()
 {
-	MessageBox(_T("default alg"), _T("ALG"), MB_OK);
-	CWnd* cwndDft = GetDlgItem(IDC_RBTN_DEFAULT) ;
 	mSzEncAlg = _T("DES");
-
-	// TODO: 在此添加控件通知处理程序代码
 }
-
-
-void CwinmfcDlg::OnEnChangeMfceditbrowseDst()
-{
-	// TODO:  如果该控件是 RICHEDIT 控件，它将不
-	// 发送此通知，除非重写 CDialogEx::OnInitDialog()
-	// 函数并调用 CRichEditCtrl().SetEventMask()，
-	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
-
-	// TODO:  在此添加控件通知处理程序代码
-}
-
 
 void CwinmfcDlg::OnBnClickedRbtnDes()
 {
@@ -395,5 +369,16 @@ void ConvertUTF8ToANSI(char *strUtf8, char *strAnsi)
  
     delete[] wszAnsi; 
 }
-
 */
+void CwinmfcDlg::Message(TCHAR* msg)
+{
+	if(wcslen(msg) > 0)
+	{
+		CWnd *pwndStatic = GetDlgItem(IDC_EDIT1);
+		if (pwndStatic)
+		{
+			pwndStatic->SetWindowTextW(msg);
+		}
+		
+	}
+}

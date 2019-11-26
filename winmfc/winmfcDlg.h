@@ -18,7 +18,8 @@ public:
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
-	CMFCEditBrowseCtrl mEditBrowse;
+	CMFCEditBrowseCtrl mEditBrowseSrc;
+	CMFCEditBrowseCtrl mEditBrowseDst;
 
 	CButton mBtnAlgDefault;
 
@@ -33,14 +34,12 @@ protected:
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-	DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP();
+	void Message(TCHAR* msg);
 public:
-	afx_msg void OnEnChangeMfceditbrowseSrc();
 	afx_msg void OnBnClickedCancel();
-	afx_msg void OnBnClickedMfcbtnEnc();
 	afx_msg void OnBnClickedRdAlg();
-	afx_msg void OnEnChangeMfceditbrowseDst();
-	afx_msg void OnEnUpdateMfceditbrowseDst();
+	afx_msg void OnBnClickedMfcbtnEnc();
 protected:
 	// 加密算法
 	wchar_t* mSzEncAlg;
