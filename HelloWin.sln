@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GetEnvironmentStrings", "Ge
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HEAD", "HEAD\HEAD.vcxproj", "{260F0EC5-0D0B-45A5-B4C9-2A15A4BBE2C3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winmfc", "..\winmfc\winmfc.vcxproj", "{44E72BAC-C8EE-459D-A62C-C83098744DB4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winmfc", "winmfc\winmfc.vcxproj", "{44E72BAC-C8EE-459D-A62C-C83098744DB4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

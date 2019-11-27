@@ -101,23 +101,23 @@
     <None Include="res\winmfc.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DESEnc.h" />
+    <ClInclude Include="DESDecoder.h" />
     <ClInclude Include="MFCEditBrowseCtrlNoFlicker.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="TT.h" />
+    <ClInclude Include="DESEncoder.h" />
     <ClInclude Include="winmfc.h" />
     <ClInclude Include="winmfcDlg.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DESEnc.cpp" />
+    <ClCompile Include="DESDecoder.cpp" />
     <ClCompile Include="MFCEditBrowseCtrlNoFlicker.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TT.cpp" />
+    <ClCompile Include="DESEncoder.cpp" />
     <ClCompile Include="winmfc.cpp" />
     <ClCompile Include="winmfcDlg.cpp" />
   </ItemGroup>

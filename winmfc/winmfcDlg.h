@@ -4,6 +4,7 @@
 
 #pragma once
 #include "afxwin.h"
+#include "afxbutton.h"
 
 
 // CwinmfcDlg ¶Ô»°¿ò
@@ -45,8 +46,13 @@ protected:
 	wchar_t* mSzEncAlg;
 private:
 	CEdit mCEditPwd;
+
+	CFont m_font;
 public:
 	afx_msg void OnBnClickedRbtnDes();
 	afx_msg void OnBnClickedRbtnAes();
 	afx_msg void OnBnClickedRbtnSm4();
+	CMFCButton mCMFCBtnEnc;
+	CMFCButton mCMFCBtnDec;
+	afx_msg void OnBnClickedMfcbtnDec();
 };
