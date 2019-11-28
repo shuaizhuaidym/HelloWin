@@ -10,6 +10,9 @@
 #include "string"
 #include "DESEncoder.h"
 
+#include "DESDecoder.h"
+
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -390,4 +393,18 @@ int isUnicode()
 void CwinmfcDlg::OnBnClickedMfcbtnDec()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	CString strSrcPath;
+	GetDlgItemText(IDC_MFCEDITBROWSE1, strSrcPath);
+
+	//获取加密密码
+		CString strPwd;
+		mCEditPwd.GetWindowText(strPwd);
+		
+		//目标文件路径
+		CString strDstPath;
+		GetDlgItemText(IDC_MFCEDITBROWSE_DST, strDstPath);
+
+		DESDecoder* decoder = new DESDecoder();
+		decoder->MyDecryptFile((LPTSTR)(LPCTSTR)strSrcPath, (LPTSTR)(LPCTSTR)strDstPath, (LPTSTR)(LPCTSTR)strPwd);
+		delete decoder;
 }

@@ -7,18 +7,11 @@
 #include <wincrypt.h>
 #include <conio.h>
 
+#include <bcrypt.h>
+ 
+
 // Link with the Advapi32.lib file.
-#pragma comment (lib, "advapi32")
-
-#define KEYLENGTH  0x00800000
-#define ENCRYPT_ALGORITHM CALG_DES 
-#define ENCRYPT_BLOCK_SIZE 8 
-
-/**
- * Key length: 56 bits. Default mode: Cipher block chaining.
- * Block size: 64 bits.
- * No salt allowed.
- */
+#pragma comment (lib, "advapi32") 
 
 DESEncoder::DESEncoder(void){}
 
@@ -238,11 +231,28 @@ bool DESEncoder::MYEncryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
             goto Exit_EncryptFile;
         }
         //-----------------------------------------------------------
-        // Derive a session key from the hash object. 
+        // Derive a session key from the hash object.
+		/**
+		NTSTATUS BCryptDeriveKeyCapi(
+		  BCRYPT_HASH_HANDLE hHash,
+		  BCRYPT_ALG_HANDLE  hTargetAlg,
+		  PUCHAR             pbDerivedKey,
+		  ULONG              cbDerivedKey,
+		  ULONG              dwFlags
+		);*/
+		/*BOOL CryptDeriveKey(
+		  HCRYPTPROV hProv,
+		  ALG_ID     Algid,
+		  HCRYPTHASH hBaseData,
+		  DWORD      dwFlags,
+		  HCRYPTKEY  *phKey
+		);*/
+
         if(CryptDeriveKey(hCryptProv, ENCRYPT_ALGORITHM, hHash, KEYLENGTH, &hKey)) 
+		//if(BCryptDeriveKeyCapi(hHash, CALG_DES, &hKey, 56, 0))
 		{
             _tprintf(TEXT("An encryption key is derived from the "), TEXT("password hash. \n")); 
-        } 
+        }
 		else 
 		{
             MyHandleError(TEXT("Error during CryptDeriveKey!\n"), GetLastError()); 
@@ -383,5 +393,6 @@ Exit_EncryptFile:
 void DESEncoder::MyHandleError(LPTSTR psz, int nErrorNumber){
     _ftprintf(stderr, TEXT("An error occurred in the program. \n"));
     _ftprintf(stderr, TEXT("%s\n"), psz);
+
     _ftprintf(stderr, TEXT("Error number %x.\n"), nErrorNumber);
 }
