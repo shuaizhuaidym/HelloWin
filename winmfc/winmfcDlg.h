@@ -5,7 +5,7 @@
 #pragma once
 #include "afxwin.h"
 #include "afxbutton.h"
-
+#include "resource.h"
 
 // CwinmfcDlg ¶Ô»°¿ò
 class CwinmfcDlg : public CDialogEx
@@ -36,7 +36,6 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP();
-	void Message(TCHAR* msg);
 public:
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnBnClickedRdAlg();
@@ -55,4 +54,6 @@ public:
 	CMFCButton mCMFCBtnEnc;
 	CMFCButton mCMFCBtnDec;
 	afx_msg void OnBnClickedMfcbtnDec();
+
+	void Message(TCHAR* msg);
 };

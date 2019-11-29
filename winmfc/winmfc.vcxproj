@@ -95,6 +95,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="..\..\..\..\..\Desktop\open16.ico" />
+    <None Include="ClassDiagram1.cd" />
     <None Include="E:\图片素材\open.bmp" />
     <None Include="ReadMe.txt" />
     <None Include="res\icon1.ico" />

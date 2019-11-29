@@ -50,9 +50,7 @@ END_MESSAGE_MAP()
 
 // CwinmfcDlg 对话框
 
-CwinmfcDlg::CwinmfcDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(CwinmfcDlg::IDD, pParent)
-	, mSzEncAlg(0)
+CwinmfcDlg::CwinmfcDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CwinmfcDlg::IDD, pParent), mSzEncAlg(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -111,8 +109,8 @@ BOOL CwinmfcDlg::OnInitDialog()
 	// TODO: 在此添加额外的初始化代码
 	
 	//设置文件格式过滤
-	mEditBrowseSrc.EnableFileBrowseButton(_T(""),_T("Bash Files(*.sh)|*.sh|Text Files(*.txt)|*.txt|All Files (*.*)|*.*||"));
-	mEditBrowseDst.EnableFileBrowseButton(_T(""),_T("Bash Files(*.sh)|*.sh|Text Files(*.txt)|*.txt|All Files (*.*)|*.*||"));
+	mEditBrowseSrc.EnableFileBrowseButton(_T(""),_T("Text Files(*.txt)|*.txt|Bash Files(*.sh)|*.sh|All Files (*.*)|*.*||"));
+	mEditBrowseDst.EnableFileBrowseButton(_T(""),_T("Text Files(*.txt)|*.txt|Bash Files(*.sh)|*.sh|All Files (*.*)|*.*||"));
 	SetDlgItemText(IDC_EDITPWD, L"dsserver");
 	
 	//设置按钮图标，可以解决默认按钮在win10下闪烁问题
@@ -256,29 +254,9 @@ void CwinmfcDlg::OnBnClickedMfcbtnEnc()
 		//目标文件路径
 		CString strDstPath;
 		GetDlgItemText(IDC_MFCEDITBROWSE_DST, strDstPath);
-		//目标文件
-		//CFile fileDst;
-		//CFileException ex2;
-
-		//if (fileDst.Open(strDstPath,  CFile::modeCreate | CFile::modeWrite|CFile::typeBinary, &ex2))
-		//{
-		//	fileDst.Write(content, nBytes);
-		//}
-		//else
-		//{//打开文件失败
-			// complain if an error happened ,no need to delete the ex object
-		//	TCHAR szError[1024];
-		//	CString strErrMsg;
-		//	ex.GetErrorMessage(szError, 1024);
-
-		//	strErrMsg.Format(_T("Couldn't open source file: %s\n"), szError);
-		//	Message(strErrMsg.GetBuffer());			
-		//}
-
-		//free(content);
-		// delete it
+		//free(content);		
 		//delete [] wcharContent;
-		DESEncoder* encoder = new DESEncoder();
+		DESEncoder* encoder = new DESEncoder(*this);
 		encoder->MYEncryptFile((LPTSTR)(LPCTSTR)strSrcPath, (LPTSTR)(LPCTSTR)strDstPath, (LPTSTR)(LPCTSTR)strPwd);
 		delete encoder;
 	//}
@@ -286,7 +264,6 @@ void CwinmfcDlg::OnBnClickedMfcbtnEnc()
 
 void CwinmfcDlg::OnBnClickedCancel()
 {
-	// TODO: Add your control notification handler code here
 	CDialogEx::OnCancel();
 }
    

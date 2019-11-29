@@ -8,6 +8,8 @@
 #include <conio.h>
 
 #include <bcrypt.h>
+
+#include "winmfcDlg.h"
  
 
 // Link with the Advapi32.lib file.
@@ -15,7 +17,14 @@
 
 DESEncoder::DESEncoder(void){}
 
+DESEncoder::DESEncoder(CwinmfcDlg & conl)
+{
+	console = &conl;
+}
+
 DESEncoder::~DESEncoder(void){}
+
+
 
 //-------------------------------------------------------------------
 // Code for the function EncryptFile called by main.
@@ -49,7 +58,8 @@ bool DESEncoder::MYEncryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
     hSourceFile = CreateFile(pszSourceFile, FILE_READ_DATA, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if(INVALID_HANDLE_VALUE != hSourceFile) 
 	{
-        _tprintf(TEXT("The source plaintext file, %s, is open. \n"), pszSourceFile);
+        //_tprintf(TEXT("The source plaintext file, %s, is open. \n"), pszSourceFile);
+		Log(L"The source plaintext file, %s, is open. \n", pszSourceFile);
     } 
 	else 
 	{ 
@@ -62,8 +72,11 @@ bool DESEncoder::MYEncryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
     hDestinationFile = CreateFile(pszDestinationFile, FILE_WRITE_DATA, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if(INVALID_HANDLE_VALUE != hDestinationFile) 
 	{
-         _tprintf(TEXT("The destination file, %s, is open. \n"), pszDestinationFile);
-    }
+		//_tprintf(TEXT("The destination file, %s, is open. \n"), pszDestinationFile);
+		TCHAR msg[100];
+		_swprintf(msg, L"The destination file, %s, is open. \n", pszSourceFile);
+		console->Message(msg);
+	}
 	else
 	{
         MyHandleError(TEXT("Error opening destination file!\n"), GetLastError()); 
@@ -251,6 +264,7 @@ bool DESEncoder::MYEncryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
         if(CryptDeriveKey(hCryptProv, ENCRYPT_ALGORITHM, hHash, KEYLENGTH, &hKey)) 
 		//if(BCryptDeriveKeyCapi(hHash, CALG_DES, &hKey, 56, 0))
 		{
+
             _tprintf(TEXT("An encryption key is derived from the "), TEXT("password hash. \n")); 
         }
 		else 
@@ -392,7 +406,15 @@ Exit_EncryptFile:
 
 void DESEncoder::MyHandleError(LPTSTR psz, int nErrorNumber){
     _ftprintf(stderr, TEXT("An error occurred in the program. \n"));
+	console->Message(L"hi");
     _ftprintf(stderr, TEXT("%s\n"), psz);
 
     _ftprintf(stderr, TEXT("Error number %x.\n"), nErrorNumber);
+}
+
+void DESEncoder::Log(TCHAR* fmt, LPTSTR param)
+{
+	TCHAR msg[100];
+	_swprintf(msg, fmt, param);
+	console->Message(msg);
 }

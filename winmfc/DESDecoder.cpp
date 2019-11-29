@@ -24,10 +24,7 @@ DESDecoder::~DESDecoder(void){}
 //   created.
 //  pszPassword, either NULL if a password is not to be used or the 
 //   string that is the password.
-bool DESDecoder::MyDecryptFile(
-    LPTSTR pszSourceFile, 
-    LPTSTR pszDestinationFile, 
-    LPTSTR pszPassword)
+bool DESDecoder::MyDecryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, LPTSTR pszPassword)
 { 
     //---------------------------------------------------------------
     // Declare and initialize local variables.
@@ -46,69 +43,39 @@ bool DESDecoder::MyDecryptFile(
 
     //---------------------------------------------------------------
     // Open the source file. 
-    hSourceFile = CreateFile(
-        pszSourceFile, 
-        FILE_READ_DATA,
-        FILE_SHARE_READ,
-        NULL,
-        OPEN_EXISTING,
-        FILE_ATTRIBUTE_NORMAL,
-        NULL);
+    hSourceFile = CreateFile(pszSourceFile, FILE_READ_DATA, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if(INVALID_HANDLE_VALUE != hSourceFile)
     {
-        _tprintf(
-            TEXT("The source encrypted file, %s, is open. \n"), 
-            pszSourceFile);
+        _tprintf(TEXT("The source encrypted file, %s, is open. \n"), pszSourceFile);
     }
     else
     { 
-        MyHandleError(
-            TEXT("Error opening source plaintext file!\n"), 
-            GetLastError());
+        MyHandleError(TEXT("Error opening source plaintext file!\n"), GetLastError());
         goto Exit_MyDecryptFile;
     } 
 
     //---------------------------------------------------------------
     // Open the destination file. 
-    hDestinationFile = CreateFile(
-        pszDestinationFile, 
-        FILE_WRITE_DATA,
-        FILE_SHARE_READ,
-        NULL,
-        OPEN_ALWAYS,
-        FILE_ATTRIBUTE_NORMAL,
-        NULL);
+    hDestinationFile = CreateFile(pszDestinationFile, FILE_WRITE_DATA, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if(INVALID_HANDLE_VALUE != hDestinationFile)
     {
-         _tprintf(
-             TEXT("The destination file, %s, is open. \n"), 
-             pszDestinationFile);
+         _tprintf(TEXT("The destination file, %s, is open. \n"), pszDestinationFile);
     }
     else
     {
-        MyHandleError(
-            TEXT("Error opening destination file!\n"), 
-            GetLastError()); 
+        MyHandleError(TEXT("Error opening destination file!\n"), GetLastError()); 
         goto Exit_MyDecryptFile;
     }
 
     //---------------------------------------------------------------
     // Get the handle to the default provider. 
-    if(CryptAcquireContext(
-        &hCryptProv, 
-        NULL, 
-        MS_ENHANCED_PROV, 
-        PROV_RSA_FULL, 
-        0))
+    if(CryptAcquireContext(&hCryptProv, NULL, MS_ENHANCED_PROV, PROV_RSA_FULL, 0))
     {
-        _tprintf(
-            TEXT("A cryptographic provider has been acquired. \n"));
+        _tprintf(TEXT("A cryptographic provider has been acquired. \n"));
     }
     else
     {
-        MyHandleError(
-            TEXT("Error during CryptAcquireContext!\n"), 
-            GetLastError());
+        MyHandleError(TEXT("Error during CryptAcquireContext!\n"), GetLastError());
         goto Exit_MyDecryptFile;
     }
 
@@ -123,58 +90,33 @@ bool DESDecoder::MyDecryptFile(
         PBYTE pbKeyBlob = NULL;
 
         // Read the key BLOB length from the source file. 
-        if(!ReadFile(
-            hSourceFile, 
-            &dwKeyBlobLen, 
-            sizeof(DWORD), 
-            &dwCount, 
-            NULL))
+        if(!ReadFile(hSourceFile, &dwKeyBlobLen, sizeof(DWORD), &dwCount, NULL))
         {
-            MyHandleError(
-                TEXT("Error reading key BLOB length!\n"), 
-                GetLastError());
+            MyHandleError(TEXT("Error reading key BLOB length!\n"), GetLastError());
             goto Exit_MyDecryptFile;
         }
 
         // Allocate a buffer for the key BLOB.
         if(!(pbKeyBlob = (PBYTE)malloc(dwKeyBlobLen)))
         {
-            MyHandleError(
-                TEXT("Memory allocation error.\n"), 
-                E_OUTOFMEMORY); 
+            MyHandleError(TEXT("Memory allocation error.\n"), E_OUTOFMEMORY); 
         }
 
         //-----------------------------------------------------------
         // Read the key BLOB from the source file. 
-        if(!ReadFile(
-            hSourceFile, 
-            pbKeyBlob, 
-            dwKeyBlobLen, 
-            &dwCount, 
-            NULL))
+        if(!ReadFile(hSourceFile, pbKeyBlob, dwKeyBlobLen, &dwCount, NULL))
         {
-            MyHandleError(
-                TEXT("Error reading key BLOB length!\n"), 
-                GetLastError());
+            MyHandleError(TEXT("Error reading key BLOB length!\n"), GetLastError());
             goto Exit_MyDecryptFile;
         }
 
         //-----------------------------------------------------------
         // Import the key BLOB into the CSP. 
-        if(!CryptImportKey(
-              hCryptProv, 
-              pbKeyBlob, 
-              dwKeyBlobLen, 
-              0, 
-              0, 
-              &hKey))
+        if(!CryptImportKey(hCryptProv, pbKeyBlob, dwKeyBlobLen, 0, 0, &hKey))
         {
-            MyHandleError(
-                TEXT("Error during CryptImportKey!/n"), 
-                GetLastError()); 
+            MyHandleError(TEXT("Error during CryptImportKey!/n"), GetLastError()); 
             goto Exit_MyDecryptFile;
         }
-
         if(pbKeyBlob)
         {
             free(pbKeyBlob);
@@ -188,45 +130,25 @@ bool DESDecoder::MyDecryptFile(
 
         //-----------------------------------------------------------
         // Create a hash object. 
-        if(!CryptCreateHash(
-               hCryptProv, 
-               CALG_MD5, 
-               0, 
-               0, 
-               &hHash))
+        if(!CryptCreateHash(hCryptProv, CALG_MD5, 0, 0, &hHash))
         {
-            MyHandleError(
-                TEXT("Error during CryptCreateHash!\n"), 
-                GetLastError());
+            MyHandleError(TEXT("Error during CryptCreateHash!\n"), GetLastError());
             goto Exit_MyDecryptFile;
         }
         
         //-----------------------------------------------------------
         // Hash in the password data. 
-        if(!CryptHashData(
-               hHash, 
-               (BYTE *)pszPassword, 
-               lstrlen(pszPassword), 
-               0)) 
+        if(!CryptHashData(hHash, (BYTE *)pszPassword, lstrlen(pszPassword), 0)) 
         {
-            MyHandleError(
-                TEXT("Error during CryptHashData!\n"), 
-                GetLastError()); 
+            MyHandleError(TEXT("Error during CryptHashData!\n"),  GetLastError()); 
             goto Exit_MyDecryptFile;
         }
     
         //-----------------------------------------------------------
         // Derive a session key from the hash object. 
-        if(!CryptDeriveKey(
-              hCryptProv, 
-              ENCRYPT_ALGORITHM, 
-              hHash, 
-              KEYLENGTH, 
-              &hKey))
+		if(!CryptDeriveKey(hCryptProv, ENCRYPT_ALGORITHM, hHash, KEYLENGTH, &hKey))
         { 
-            MyHandleError(
-                TEXT("Error during CryptDeriveKey!\n"), 
-                GetLastError()) ; 
+            MyHandleError(TEXT("Error during CryptDeriveKey!\n"), GetLastError()) ; 
             goto Exit_MyDecryptFile;
         }
     }
@@ -259,16 +181,9 @@ bool DESDecoder::MyDecryptFile(
     {
         //-----------------------------------------------------------
         // Read up to dwBlockLen bytes from the source file. 
-        if(!ReadFile(
-            hSourceFile, 
-            pbBuffer, 
-            dwBlockLen, 
-            &dwCount, 
-            NULL))
+        if(!ReadFile(hSourceFile, pbBuffer, dwBlockLen, &dwCount, NULL))
         {
-            MyHandleError(
-                TEXT("Error reading from source file!\n"), 
-                GetLastError());
+            MyHandleError(TEXT("Error reading from source file!\n"), GetLastError());
             goto Exit_MyDecryptFile;
         }
 
@@ -279,32 +194,17 @@ bool DESDecoder::MyDecryptFile(
 
         //-----------------------------------------------------------
         // Decrypt the block of data. 
-        if(!CryptDecrypt(
-              hKey, 
-              0, 
-              fEOF, 
-              0, 
-              pbBuffer, 
-              &dwCount))
+        if(!CryptDecrypt(hKey, 0, fEOF, 0, pbBuffer, &dwCount))
         {
-            MyHandleError(
-                TEXT("Error during CryptDecrypt!\n"), 
-                GetLastError()); 
+            MyHandleError(TEXT("Error during CryptDecrypt!\n"), GetLastError()); 
             goto Exit_MyDecryptFile;
         }
 
         //-----------------------------------------------------------
         // Write the decrypted data to the destination file. 
-        if(!WriteFile(
-            hDestinationFile, 
-            pbBuffer, 
-            dwCount,
-            &dwCount,
-            NULL))
+        if(!WriteFile(hDestinationFile, pbBuffer, dwCount, &dwCount, NULL))
         { 
-            MyHandleError(
-                TEXT("Error writing ciphertext.\n"), 
-                GetLastError());
+            MyHandleError(TEXT("Error writing ciphertext.\n"), GetLastError());
             goto Exit_MyDecryptFile;
         }
 
@@ -343,9 +243,7 @@ Exit_MyDecryptFile:
     {
         if(!(CryptDestroyHash(hHash)))
         {
-            MyHandleError(
-                TEXT("Error during CryptDestroyHash.\n"), 
-                GetLastError()); 
+            MyHandleError(TEXT("Error during CryptDestroyHash.\n"), GetLastError()); 
         }
 
         hHash = NULL;
@@ -357,9 +255,7 @@ Exit_MyDecryptFile:
     {
         if(!(CryptDestroyKey(hKey)))
         {
-            MyHandleError(
-                TEXT("Error during CryptDestroyKey!\n"), 
-                GetLastError());
+            MyHandleError(TEXT("Error during CryptDestroyKey!\n"), GetLastError());
         }
     } 
 
@@ -369,9 +265,7 @@ Exit_MyDecryptFile:
     {
         if(!(CryptReleaseContext(hCryptProv, 0)))
         {
-            MyHandleError(
-                TEXT("Error during CryptReleaseContext!\n"), 
-                GetLastError());
+            MyHandleError(TEXT("Error during CryptReleaseContext!\n"), GetLastError());
         }
     } 
 
