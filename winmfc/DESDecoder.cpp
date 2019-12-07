@@ -123,7 +123,7 @@ bool DESDecoder::MyDecryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
         }
     }
     else
-    {
+    {//has passwd
         //-----------------------------------------------------------
         // Decrypt the file with a session key derived from a 
         // password. 
@@ -146,7 +146,7 @@ bool DESDecoder::MyDecryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
     
         //-----------------------------------------------------------
         // Derive a session key from the hash object. 
-		if(!CryptDeriveKey(hCryptProv, ENCRYPT_ALGORITHM, hHash, KEYLENGTH, &hKey))
+		if(!CryptDeriveKey(hCryptProv, ENCRYPT_ALGORITHM, hHash, KEYLENGTH | CRYPT_EXPORTABLE, &hKey))
         { 
             MyHandleError(TEXT("Error during CryptDeriveKey!\n"), GetLastError()) ; 
             goto Exit_MyDecryptFile;
@@ -187,7 +187,7 @@ bool DESDecoder::MyDecryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
             goto Exit_MyDecryptFile;
         }
 
-        if(dwCount <= dwBlockLen)
+        if(dwCount < dwBlockLen)//实际读取小于预期,说明到末尾了,do not include =
         {
             fEOF = TRUE;
         }

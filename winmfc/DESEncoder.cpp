@@ -98,7 +98,7 @@ bool DESEncoder::MYEncryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
     //---------------------------------------------------------------
     // Create the session key.
     if(!pszPassword || !pszPassword[0]) 
-	{ 
+	{//have no passwd input 
         //-----------------------------------------------------------
         // No password was passed.
         // Encrypt the file with a random session key, and write the key to a file. 
@@ -212,7 +212,7 @@ bool DESEncoder::MYEncryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
         free(pbKeyBlob);
     } 
     else 
-    { 
+    {//user input passwd 
 
         //-----------------------------------------------------------
         // The file will be encrypted with a session key derived 
@@ -245,14 +245,6 @@ bool DESEncoder::MYEncryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
         }
         //-----------------------------------------------------------
         // Derive a session key from the hash object.
-		/**
-		NTSTATUS BCryptDeriveKeyCapi(
-		  BCRYPT_HASH_HANDLE hHash,
-		  BCRYPT_ALG_HANDLE  hTargetAlg,
-		  PUCHAR             pbDerivedKey,
-		  ULONG              cbDerivedKey,
-		  ULONG              dwFlags
-		);*/
 		/*BOOL CryptDeriveKey(
 		  HCRYPTPROV hProv,
 		  ALG_ID     Algid,
@@ -261,13 +253,12 @@ bool DESEncoder::MYEncryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
 		  HCRYPTKEY  *phKey
 		);*/
 
-        if(CryptDeriveKey(hCryptProv, ENCRYPT_ALGORITHM, hHash, KEYLENGTH, &hKey)) 
-		//if(BCryptDeriveKeyCapi(hHash, CALG_DES, &hKey, 56, 0))
+        if(CryptDeriveKey(hCryptProv, ENCRYPT_ALGORITHM, hHash, KEYLENGTH | CRYPT_EXPORTABLE, &hKey))
 		{
 
             _tprintf(TEXT("An encryption key is derived from the "), TEXT("password hash. \n")); 
         }
-		else 
+ 		else 
 		{
             MyHandleError(TEXT("Error during CryptDeriveKey!\n"), GetLastError()); 
             goto Exit_EncryptFile;
@@ -287,7 +278,8 @@ bool DESEncoder::MYEncryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
     //---------------------------------------------------------------
     // Determine the block size. If a block cipher is used, 
     // it must have room for an extra block. 
-    if(ENCRYPT_BLOCK_SIZE > 1) 
+    //if(ENCRYPT_BLOCK_SIZE > 1) 
+	if(1000 % ENCRYPT_BLOCK_SIZE > 0)
 	{
         dwBufferLen = dwBlockLen + ENCRYPT_BLOCK_SIZE; 
     } 
