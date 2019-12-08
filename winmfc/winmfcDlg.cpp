@@ -52,7 +52,7 @@ END_MESSAGE_MAP()
 
 CwinmfcDlg::CwinmfcDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CwinmfcDlg::IDD, pParent), mSzEncAlg(0)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_hIcon = AfxGetApp()->LoadIcon(IDI_ICON2);
 }
 
 void CwinmfcDlg::DoDataExchange(CDataExchange* pDX)

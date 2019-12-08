@@ -29,6 +29,9 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="ClassDiagram1.cd" />
+    <None Include="res\m32.ico">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="winmfc.h">
