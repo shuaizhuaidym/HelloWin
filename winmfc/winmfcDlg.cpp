@@ -52,7 +52,7 @@ END_MESSAGE_MAP()
 
 CwinmfcDlg::CwinmfcDlg(CWnd* pParent /*=NULL*/) : CDialogEx(CwinmfcDlg::IDD, pParent), mSzEncAlg(0)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(AFX_IDI_STD_FRAME);
+	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
 void CwinmfcDlg::DoDataExchange(CDataExchange* pDX)
@@ -198,7 +198,7 @@ void CwinmfcDlg::OnBnClickedMfcbtnEnc()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CString strSrcPath;
-	GetDlgItemText(IDC_MFCEDITBROWSE1, strSrcPath);
+	GetDlgItemText(IDC_MFCEDITBROWSE_SRC, strSrcPath);
 
 	//CFile fileSrc;
 	//CFileException ex;
@@ -371,7 +371,7 @@ void CwinmfcDlg::OnBnClickedMfcbtnDec()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CString strSrcPath;
-	GetDlgItemText(IDC_MFCEDITBROWSE1, strSrcPath);
+	GetDlgItemText(IDC_MFCEDITBROWSE_SRC, strSrcPath);
 
 	//获取加密密码
 		CString strPwd;
