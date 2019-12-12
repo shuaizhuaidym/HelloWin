@@ -4,6 +4,14 @@
 #include "stdafx.h"
 #include "HEAD.h"
 
+#define ID_LIST 1
+#define ID_TEXT 1
+
+#define MAXREAD 8192
+
+#define DIRATTR (DDL_READWRITE | DDL_READONLY | DDL_HIDDEN | DDL_SYSTEM | DDL_DIRECTORY | DDL_ARCHIVE | DDL_DRIVES)
+#define DTFLAGS (DT_WORDBREAK | DT_EXPANDTABS | DT_NOCLIP | DT_NOPREFIX)
+
 #define MAX_LOADSTRING 100
 
 // 全局变量:
@@ -14,8 +22,12 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// 主窗口类名
 // 此代码模块中包含的函数的前向声明:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
+
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK ListProc(HWND, UINT, WPARAM, LPARAM);
+
+WNDPROC OldList;
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -63,12 +75,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 //  目的: 注册窗口类。
 //
 //  注释:
-//
-//    仅当希望
-//    此代码与添加到 Windows 95 中的“RegisterClassEx”
-//    函数之前的 Win32 系统兼容时，才需要此函数及其用法。调用此函数十分重要，
-//    这样应用程序就可以获得关联的
-//    “格式正确的”小图标。
+//  仅当希望
+//  此代码与添加到 Windows 95 中的“RegisterClassEx”函数之前的 Win32 系统兼容时，才需要此函数及其用法。
+//  调用此函数十分重要，这样应用程序就可以获得关联的“格式正确的”小图标。
 //
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
@@ -137,14 +146,94 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hdc;
 
+	static BOOL	bValidFile;
+	static BYTE  buffer[MAXREAD];
+	static HWND  hwndList, hwndText;
+	static RECT  rect;
+
+	static TCHAR szFile[MAX_PATH + 1];
+	HANDLE hFile;
+
+	int i, cxChar, cyChar;
+	TCHAR szBuffer[MAX_PATH + 1];
+
 	switch (message)
 	{
+	case WM_CREATE:
+		cxChar = LOWORD(GetDialogBaseUnits());
+		cyChar = HIWORD(GetDialogBaseUnits());
+		rect.left = 20 * cxChar;
+		rect.top = 3 * cyChar;
+
+		hwndList = CreateWindow(TEXT("listbox"), NULL, WS_CHILDWINDOW | WS_VISIBLE | LBS_STANDARD, cxChar, 
+			cyChar * 3, cxChar * 13 + GetSystemMetrics(SM_CXVSCROLL),
+			cyChar * 10, hWnd, (HMENU)ID_LIST, (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
+
+		GetCurrentDirectory(MAX_PATH + 1, szBuffer);
+
+		hwndText = CreateWindow(TEXT("static"), szBuffer, WS_CHILDWINDOW | WS_VISIBLE | SS_LEFT, 
+			cxChar, cyChar, cxChar * MAX_PATH, cyChar, hWnd, (HMENU)ID_TEXT, (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
+
+		OldList = (WNDPROC)SetWindowLong(hwndList, GWL_WNDPROC, (LPARAM)ListProc);
+		SendMessage(hwndList, LB_DIR, DIRATTR, (LPARAM)TEXT("*.*"));
+		break;
+
+	case WM_SIZE:
+		rect.left = LOWORD(lParam);
+		rect.top = HIWORD(lParam);
+		return 0;
+
+	case WM_SETFOCUS:
+
+		return 0;
+
 	case WM_COMMAND:
 		wmId    = LOWORD(wParam);
 		wmEvent = HIWORD(wParam);
+		
 		// 分析菜单选择:
 		switch (wmId)
 		{
+		case ID_LIST:
+			if(wmEvent == LBN_DBLCLK)
+			{
+				if(LB_ERR == (i = SendMessage(hwndList, LB_GETCURSEL, 0 , 0))){break;}
+				SendMessage(hwndList, LB_GETTEXT, i, (LPARAM)szBuffer);
+
+				if(INVALID_HANDLE_VALUE != (hFile = CreateFile(szBuffer, GENERIC_READ, FILE_SHARE_READ, NULL,  OPEN_EXISTING, 0 ,NULL)))
+				{
+					CloseHandle(hFile);
+					bValidFile = TRUE;
+					lstrcpy(szFile, szBuffer);
+					GetCurrentDirectory(MAX_PATH + 1, szBuffer);
+
+					if(szBuffer[lstrlen(szBuffer)]-1 != '\\')
+					{
+						lstrcat(szBuffer, TEXT("\\"));
+					}
+					SetWindowText(hwndText, szBuffer);
+				}
+				else
+				{
+					bValidFile = FALSE;
+					szBuffer[lstrlen(szBuffer) == '\0'];
+					//if the dir not work, maybe wrong drive,try it
+					if(!SetCurrentDirectory(szBuffer + 1))
+					{
+						szBuffer[3] = ':';
+						szBuffer[4] = '\0';
+						SetCurrentDirectory(szBuffer + 2);
+					}
+					//get the new directory name,fill the list box
+					GetCurrentDirectory(MAX_PATH +1, szBuffer);
+					SetWindowText(hwndText, szBuffer);
+					SendMessage(hwndList, LB_RESETCONTENT, 0, 0);
+					SendMessage(hwndList, LB_DIR, DIRATTR, (LPARAM)TEXT("*.*"));
+				}
+				InvalidateRect(hWnd, NULL, TRUE);
+			}
+			return 0;
+
 		case IDM_ABOUT:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
@@ -156,8 +245,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case WM_PAINT:
+		//TODO
+		if(!bValidFile){break;}
+
+		if(INVALID_HANDLE_VALUE == (hFile = CreateFile(szFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0 , NULL)))
+		{
+			bValidFile = FALSE;
+			break;
+		}
+		ReadFile(hFile, buffer, MAXREAD, (LPDWORD)&i, NULL);
+		CloseHandle(hFile);
+		//i== buffer size of byte,paint it to window
+
 		hdc = BeginPaint(hWnd, &ps);
-		// TODO: 在此添加任意绘图代码...
+		SelectObject(hdc, GetStockObject(SYSTEM_FIXED_FONT));
+		SetTextColor(hdc, GetSysColor(COLOR_BTNTEXT));
+		SetBkColor(hdc, GetSysColor(COLOR_BTNFACE));
+
+		//ASSUME FILE IS ASCII
+		DrawTextA(hdc, (PCSTR)buffer, i, &rect, DTFLAGS);
+		
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:
@@ -167,6 +274,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
+}
+
+//列表框事件
+LRESULT CALLBACK ListProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+{
+	if(message == WM_KEYDOWN && wparam == VK_RETURN)
+	{
+		SendMessage(GetParent(hwnd), WM_COMMAND, MAKELONG(1, LBN_DBLCLK), (LPARAM)hwnd);
+	}
+	return CallWindowProc(OldList, hwnd, message, wparam, lparam);
 }
 
 // “关于”框的消息处理程序。

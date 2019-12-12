@@ -19,9 +19,6 @@
     <None Include="res\winmfc.ico">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="res\icon1.ico">
-      <Filter>资源文件</Filter>
-    </None>
     <None Include="E:\图片素材\open.bmp">
       <Filter>资源文件</Filter>
     </None>
@@ -29,7 +26,7 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="ClassDiagram1.cd" />
-    <None Include="res\m32.ico">
+    <None Include="res\rg32.ico">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

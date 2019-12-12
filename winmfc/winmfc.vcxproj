@@ -98,8 +98,7 @@
     <None Include="ClassDiagram1.cd" />
     <None Include="E:\图片素材\open.bmp" />
     <None Include="ReadMe.txt" />
-    <None Include="res\icon1.ico" />
-    <None Include="res\m32.ico" />
+    <None Include="res\rg32.ico" />
     <None Include="res\winmfc.ico" />
   </ItemGroup>
   <ItemGroup>
