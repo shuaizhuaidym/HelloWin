@@ -143,8 +143,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
-	PAINTSTRUCT ps;
-	HDC hdc;
 
 	static BOOL	bValidFile;
 	static BYTE  buffer[MAXREAD];
@@ -153,8 +151,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	static TCHAR szFile[MAX_PATH + 1];
 	HANDLE hFile;
-
+	HDC hdc;
 	int i, cxChar, cyChar;
+	PAINTSTRUCT ps;
 	TCHAR szBuffer[MAX_PATH + 1];
 
 	switch (message)
@@ -164,27 +163,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		cyChar = HIWORD(GetDialogBaseUnits());
 		rect.left = 20 * cxChar;
 		rect.top = 3 * cyChar;
-
-		hwndList = CreateWindow(TEXT("listbox"), NULL, WS_CHILDWINDOW | WS_VISIBLE | LBS_STANDARD, cxChar, 
-			cyChar * 3, cxChar * 13 + GetSystemMetrics(SM_CXVSCROLL),
-			cyChar * 10, hWnd, (HMENU)ID_LIST, (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
+		
+		//文件列表
+		hwndList = CreateWindow(TEXT("listbox"), NULL, 
+			WS_CHILDWINDOW | WS_VISIBLE | LBS_STANDARD, 
+			cxChar, cyChar * 3, 
+			cxChar * 13 + GetSystemMetrics(SM_CXVSCROLL),
+			cyChar * 10, 
+			hWnd, (HMENU)ID_LIST, 
+			(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), 
+			NULL);
 
 		GetCurrentDirectory(MAX_PATH + 1, szBuffer);
-
-		hwndText = CreateWindow(TEXT("static"), szBuffer, WS_CHILDWINDOW | WS_VISIBLE | SS_LEFT, 
-			cxChar, cyChar, cxChar * MAX_PATH, cyChar, hWnd, (HMENU)ID_TEXT, (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
+		
+		//显示内容的区域
+		hwndText = CreateWindow(TEXT("static"), szBuffer, 
+			WS_CHILDWINDOW | WS_VISIBLE | SS_LEFT, 
+			cxChar, cyChar, cxChar * MAX_PATH, cyChar, 
+			hWnd, (HMENU)ID_TEXT, 
+			(HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), 
+			NULL);
 
 		OldList = (WNDPROC)SetWindowLong(hwndList, GWL_WNDPROC, (LPARAM)ListProc);
 		SendMessage(hwndList, LB_DIR, DIRATTR, (LPARAM)TEXT("*.*"));
 		break;
 
 	case WM_SIZE:
-		rect.left = LOWORD(lParam);
-		rect.top = HIWORD(lParam);
+		rect.right  = LOWORD(lParam);
+		rect.bottom = HIWORD(lParam);
 		return 0;
 
 	case WM_SETFOCUS:
-
+		SetFocus(hwndList);
 		return 0;
 
 	case WM_COMMAND:
