@@ -107,6 +107,9 @@ bool DESEncoder::MYEncryptFile(LPTSTR pszSourceFile, LPTSTR pszDestinationFile, 
         if(CryptGenKey(hCryptProv, ENCRYPT_ALGORITHM, KEYLENGTH | CRYPT_EXPORTABLE, &hKey))
         {
             _tprintf(TEXT("A session key has been created. \n"));
+			//TODO try to consist with javax api
+			const BYTE mod = CRYPT_MODE_ECB;
+			CryptSetKeyParam(hKey, KP_MODE, &mod, NULL);
         } 
         else
         {
